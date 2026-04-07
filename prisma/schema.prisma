@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,21 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ---------------------------------------------------------
-// MODELOS DE NEGÓCIO
-// ---------------------------------------------------------
-
 model Operador {
   id        Int      @id @default(autoincrement())
   nome      String
   login     String   @unique
   senha     String
   celular   String?
-  status    String   @default("ATIVO") // ATIVO, INATIVO
-  nivel     String   @default("OPERADOR") // ADMIN, OPERADOR
+  status    String   @default("ATIVO")
+  nivel     String   @default("OPERADOR")
   criadoEm  DateTime @default(now())
   atualizadoEm DateTime @updatedAt
-
   atendimentos Atendimento[]
   logs         LogAuditoria[]
 }
@@ -48,63 +40,47 @@ model Contato {
 model Atendimento {
   id            Int      @id @default(autoincrement())
   protocolo     String   @unique
-  status        String   @default("ESPERA") // ESPERA, ATENDENDO, FINALIZADO
+  status        String   @default("ESPERA")
   criadoEm      DateTime @default(now())
   finalizadoEm  DateTime?
-  
   contato       Contato  @relation(fields: [contatoId], references: [id])
   contatoId     Int
-  
   operador      Operador? @relation(fields: [operadorId], references: [id])
   operadorId    Int?
-  
   mensagens     Mensagem[]
 }
 
 model Mensagem {
   id            Int      @id @default(autoincrement())
-  remetente     String   // CLIENTE, OPERADOR, SISTEMA
+  remetente     String   
   conteudo      String   @db.Text
-  tipo          String   @default("TEXTO") // TEXTO, IMAGEM, DOCUMENTO
+  tipo          String   @default("TEXTO")
   criadoEm      DateTime @default(now())
-  
   atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
   atendimentoId Int
 }
-
-// ---------------------------------------------------------
-// CONFIGURAÇÕES DO SISTEMA (WHATSAPP, MENSAGENS PADRÃO)
-// ---------------------------------------------------------
 
 model SistemaConfig {
   id                Int      @id @default(1)
   waPhoneId         String?
   waWabaId          String?
   waToken           String?  @db.Text
-  
   msgBoasVindas     String?  @db.Text
   msgFinalizacao    String?  @db.Text
   msgTransferencia  String?  @db.Text
   mostrarTransf     Boolean  @default(true)
-  
   atualizadoEm      DateTime @updatedAt
 }
 
-// ---------------------------------------------------------
-// AUDITORIA (LOGS DE ATIVIDADE)
-// ---------------------------------------------------------
-
 model LogAuditoria {
   id               Int      @id @default(autoincrement())
-  entidade         String   // Operador, Setor, Config, etc.
-  acao             String   // CRIAR, EDITAR, DELETAR, LOGIN
-  detalhesAnterior String?  @db.Text // JSON string do estado anterior
-  detalhesNovo     String?  @db.Text // JSON string do novo estado
-  
+  entidade         String   
+  acao             String   
+  detalhesAnterior String?  @db.Text
+  detalhesNovo     String?  @db.Text
   ip               String?
   userAgent        String?
   timestamp        DateTime @default(now())
-  
   operador         Operador? @relation(fields: [operadorId], references: [id])
   operadorId       Int?
 }
