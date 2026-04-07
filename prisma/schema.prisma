@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------
+// MODELOS DE NEGÓCIO
+// ---------------------------------------------------------
+
+model Operador {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  login     String   @unique
+  senha     String
+  celular   String?
+  status    String   @default("ATIVO") // ATIVO, INATIVO
+  nivel     String   @default("OPERADOR") // ADMIN, OPERADOR
+  criadoEm  DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  atendimentos Atendimento[]
+  logs         LogAuditoria[]
+}
+
+model Setor {
+  id        Int      @id @default(autoincrement())
+  descricao String
+  status    String   @default("ATIVO")
+  criadoEm  DateTime @default(now())
+}
+
+model Contato {
+  id             Int      @id @default(autoincrement())
+  nome           String
+  telefone       String   @unique
+  foto           String?
+  criadoEm       DateTime @default(now())
+  atendimentos   Atendimento[]
+}
+
+model Atendimento {
+  id            Int      @id @default(autoincrement())
+  protocolo     String   @unique
+  status        String   @default("ESPERA") // ESPERA, ATENDENDO, FINALIZADO
+  criadoEm      DateTime @default(now())
+  finalizadoEm  DateTime?
+  
+  contato       Contato  @relation(fields: [contatoId], references: [id])
+  contatoId     Int
+  
+  operador      Operador? @relation(fields: [operadorId], references: [id])
+  operadorId    Int?
+  
+  mensagens     Mensagem[]
+}
+
+model Mensagem {
+  id            Int      @id @default(autoincrement())
+  remetente     String   // CLIENTE, OPERADOR, SISTEMA
+  conteudo      String   @db.Text
+  tipo          String   @default("TEXTO") // TEXTO, IMAGEM, DOCUMENTO
+  criadoEm      DateTime @default(now())
+  
+  atendimento   Atendimento @relation(fields: [atendimentoId], references: [id])
+  atendimentoId Int
+}
+
+// ---------------------------------------------------------
+// CONFIGURAÇÕES DO SISTEMA (WHATSAPP, MENSAGENS PADRÃO)
+// ---------------------------------------------------------
+
+model SistemaConfig {
+  id                Int      @id @default(1)
+  waPhoneId         String?
+  waWabaId          String?
+  waToken           String?  @db.Text
+  
+  msgBoasVindas     String?  @db.Text
+  msgFinalizacao    String?  @db.Text
+  msgTransferencia  String?  @db.Text
+  mostrarTransf     Boolean  @default(true)
+  
+  atualizadoEm      DateTime @updatedAt
+}
+
+// ---------------------------------------------------------
+// AUDITORIA (LOGS DE ATIVIDADE)
+// ---------------------------------------------------------
+
+model LogAuditoria {
+  id               Int      @id @default(autoincrement())
+  entidade         String   // Operador, Setor, Config, etc.
+  acao             String   // CRIAR, EDITAR, DELETAR, LOGIN
+  detalhesAnterior String?  @db.Text // JSON string do estado anterior
+  detalhesNovo     String?  @db.Text // JSON string do novo estado
+  
+  ip               String?
+  userAgent        String?
+  timestamp        DateTime @default(now())
+  
+  operador         Operador? @relation(fields: [operadorId], references: [id])
+  operadorId       Int?
+}

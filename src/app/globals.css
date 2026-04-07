@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-accent: #2dd4bf;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card-bg: rgba(15, 23, 42, 0.4);
+  --card-border: rgba(255, 255, 255, 0.05);
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --sidebar-bg: rgba(15, 23, 42, 0.2);
+  --header-bg: rgba(15, 23, 42, 0.2);
+  --muted-text: #64748b;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.light-mode {
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-border: rgba(15, 23, 42, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --sidebar-bg: rgba(255, 255, 255, 0.8);
+  --header-bg: rgba(255, 255, 255, 0.5);
+  --muted-text: #475569;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply font-sans h-full antialiased transition-colors duration-300;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .glass {
+    background-color: var(--card-bg);
+    @apply backdrop-blur-xl border shadow-2xl;
+    border-color: var(--card-border);
+  }
+  
+  .glass-card {
+    background-color: var(--card-bg);
+    @apply backdrop-blur-md border rounded-2xl shadow-lg transition-all;
+    border-color: var(--card-border);
+  }
+
+  .input-premium {
+    background-color: var(--input-bg);
+    color: var(--foreground);
+    border-color: var(--card-border);
+    @apply w-full border rounded-xl px-4 py-3 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-600/20;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition-all border border-slate-700/50;
+  }
+  
+  .light-mode .btn-secondary {
+    @apply bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-sm;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full hover:bg-slate-700;
+}
+
+.light-mode ::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 hover:bg-slate-400;
+}
+
+/* Fixes for Light Mode visibility */
+.light-mode .text-slate-500 {
+  @apply text-slate-500;
+}
+
+.light-mode .text-slate-400 {
+  @apply text-slate-600;
+}
+
+.light-mode .text-slate-300 {
+  @apply text-slate-700;
+}
+
+.light-mode .bg-slate-900\/10 {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.light-mode .border-slate-800\/60 {
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+.light-mode .bg-slate-950 {
+  background-color: var(--background);
 }
